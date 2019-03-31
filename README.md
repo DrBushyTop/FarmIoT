@@ -3,11 +3,11 @@ Short excercise for a Agriculture IoT solution
 
 # Architecture
 
-## Architecture image 
+## Architecture Image 
 
 
 
-## Action flow
+## Application Action Flow
 
 - Iot Device data flows through stream analytics for processing any anomalies. Data is also transferred to Time Series Insights for dashboards. It uses storage accounts on the background, which means the data is also kept within the region (LRS / ZRS replication).
 - Stream analytics detects anomalies and sends config changes to the configuration function app, which acts on the event accordingly. Validation of device ownership needs to be checked, as IoT hub does not yet allow for great user segregation. See Code remarks. 
@@ -37,18 +37,26 @@ Short excercise for a Agriculture IoT solution
 - Time series API only has a javascript client library, so the API functions would be easiest to create using that.
 - Notification function can also be node or C#. Twilio and sendgrid support both.
  
+## Deployment flow
+- Base (Storage accounts, AppInsights, Databases)
+- Device backend (IoT hub + scale function (+ still unimplemented role assingment))
+- Stream processing (Sendgrid, notification function, Stream analytics)
+- Config change (validation function, config + add functions)
+- Dashboards (Time series insights, api function)
+- Frontend + Secret management (webapp, keyvault, traffic manager)
+
 # Improvements for future
-- Credentials in keyvault before deployment, not included in this demo but definitely required for production
 - Breaking nested template structure to Azure DevOps pipelines, variable groups etc.
 - Investigation whether some function apps need linux platform. Currently all are windows.
 - Implementation of API Management as a reverse proxy for all the functions?
 - Implement vnet between customer databases, using service endpoints. Just need a way to allow for notification function to query db.
 - Redis cache firewall / virtual network tie-in. Schedule updates, Geo replication?
 - Function template to copy loop through input for application settings for better reusability OR Automatic implementation of all endpoint information to functions via powershell.
-- Inclusion of data saving to data lake, data processing, machine learning?
+- Inclusion of data saving to data lake / cosmosdb for long term storage, data processing, machine learning?
 - App insights alerting
 - Azure AD B2C could be considered as an identity option instead of B2B, but unfortunately I do not have much experience with it.
 - CosmosDB database creation via powershell etc. No documentation available in ARM currently.
 - Log Analytics + Adding IOT hub logs there.
 - Determine required webapp sizing based on load testing (could use Azure DevOps for testing)
-- Function app name in stream analytics ouput is currently not set
+- Function name & apikey in stream analytics ouput is currently not set, it cannot be currently fetched in ARM and would require custom function to do so: https://medium.com/@mandur/get-azure-function-host-key-in-an-arm-deployment-template-1eb7ba03c083 
+- Scale function contributor role assignment to IOT hub is not currently being done in the deployment

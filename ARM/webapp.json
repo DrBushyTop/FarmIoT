@@ -1,0 +1,147 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppName":{
+          "type": "string",
+          "metadata": {
+              "description": "Name of the web app fetched from master template"
+          }  
+        },
+        "sku":{
+            "type": "string",
+            "metadata": {
+                "description": "Size of the app service plan fetched from master template"
+            }
+        },
+        "logSAName":{
+            "type": "string",
+            "metadata": {
+                "description": "logSAName from master template"
+            }
+        },
+        "gcdbName":{
+            "type": "string",
+            "metadata": {
+                "description": "global customer database name from master template"
+            }
+        },
+        "lcdbName":{
+            "type": "string",
+            "metadata": {
+                "description": "local customer database name from master template"
+            }
+        },
+        "redisName":{
+            "type": "string",
+            "metadata": {
+                "description": "redis cluster name from master template"
+            }
+        },
+        "location":{
+            "type": "string",
+            "metadata": {
+                "description": "location from master template"
+            }
+        },
+        "keyVaultName":{
+            "type": "string",
+            "metadata": {
+                "description": "keyVaultName from master template"
+            }
+        },
+        "appInsightsName":{
+            "type": "string",
+            "metadata": {
+                "description": "AppInsights name from master template"
+            }
+        },
+        "tags":{
+            "type": "object",
+            "metadata": {
+                "description": "tags from master template"
+            }
+        }
+    },
+    "variables": {
+        "appServicePlanName":"[concat(parameters('webAppName'),'plan')]",
+        "resourceID": "[concat('Microsoft.Web/sites/', parameters('webAppName'))]",
+        "webAppApiVersion": "[providers('Microsoft.Web', 'sites').apiVersions[0]]",
+        "aiApiVersion": "[providers('Microsoft.Insights', 'components').apiVersions[0]]",
+        "storageApiVersion": "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]",
+        "logSAId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', parameters('logSAName'))]"
+    },
+    "resources": [
+        {
+          "apiVersion": "2017-08-01",
+          "type": "Microsoft.Web/serverfarms",
+          "kind": "app",
+          "name": "[variables('appServicePlanName')]",
+          "location": "[parameters('location')]",
+          "comments": "This app service plan is used for the web app and slots.",
+          "tags": "[parameters('tags')]",
+          "properties": {},
+          "dependsOn": [],
+          "sku": {
+            "name": "[parameters('sku')]"
+          }
+        },
+        {
+          "apiVersion": "2016-08-01",
+          "type": "Microsoft.Web/sites",
+          "kind": "app",
+          "name": "[parameters('webAppName')]",
+          "tags": "[parameters('tags')]",
+          "location": "[parameters('location')]",
+          "comments": "This is the web app, also the default 'nameless' slot.",
+          "properties": {
+            "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+            "siteConfig": {
+                "AlwaysOn": true
+            }
+          },
+          "resources": [
+            {
+                "apiVersion": "2016-08-01",
+                "name": "Microsoft.ApplicationInsights.AzureWebSites",
+                "type": "siteextensions",
+                "dependsOn": [
+                  "[resourceId('Microsoft.Web/Sites', parameters('webAppName'))]"
+                ],
+                "properties": {},
+                "tags": "[parameters('tags')]"
+            },
+            {
+                "apiVersion": "2016-08-01",
+                "name": "appsettings",
+                "type": "config",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Web/Sites', parameters('webAppName'))]",
+                    "Microsoft.ApplicationInsights.AzureWebSites"
+                ],
+                "properties": {
+                    "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('logSAName'), ';AccountKey=', listKeys(variables('logSAId'),variables('storageApiVersion')).keys[0].value)]",
+                    "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('logSAName'), ';AccountKey=', listKeys(variables('logSAId'),variables('storageApiVersion')).keys[0].value)]",
+                    "gcdbName": "[parameters('gcdbName')]",
+                    "lcdbName": "[parameters('lcdbName')]",
+                    "redisName": "[parameters('redisName')]",
+                    "keyvaultUrl": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]",
+                    "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), variables('aiApiVersion')).InstrumentationKey]"
+                }
+            }
+          ],
+          "identity":{
+              "type":"SystemAssigned"
+          },
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+          ]
+        }
+      ],
+    "outputs": {
+        "ObjectID":{
+            "type": "string",
+            "value": "[reference(variables('resourceID'), variables('webAppApiVersion'), 'Full').identity.principalId]"
+        }
+    }
+}

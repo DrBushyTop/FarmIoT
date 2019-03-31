@@ -1,0 +1,131 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName":{
+            "type": "string",
+            "metadata": {
+                "description": "KeyVaultName fetched from master template"
+            }
+        },
+        "tenantId":{
+            "type": "string",
+            "metadata": {
+                "description": "tenantId fetched from master template"
+            }
+        },
+        "objectIDs":{
+            "type": "array",
+            "metadata": {
+                "description": "Object IDs for Access policies"
+            }
+        },
+        "lcdbName":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Local customer db storage account for secret creation"
+            }
+        },
+        "gcdbName":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Global customer db for secret creation"
+            }
+        },
+        "redisName":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Redis cluster for secret creation"
+            }
+        },
+        "sendgridPassword":{
+            "type": "securestring",
+            "metadata": {
+                "description": "password for sendgrid. Will be saved to keyvault, but in production really should not have a default value."
+            }
+        }
+    },
+    "variables": {
+        "lcdbApiVersion": "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]",
+        "gcdbApiVersion": "[providers('Microsoft.DocumentDB', 'databaseAccounts').apiVersions[0]]",
+        "redisApiVersion": "[providers('Microsoft.Cache', 'Redis').apiVersions[0]]"
+    },
+    "resources": [
+        {
+           "type": "Microsoft.KeyVault/vaults",
+           "apiVersion": "2018-02-14",
+           "name": "[parameters('keyVaultName')]",
+           "location": "[resourceGroup().location]",
+           "properties": {
+                "enabledForDeployment": true,
+                "enabledForTemplateDeployment": true,
+                "enabledForDiskEncryption": true,
+                "tenantId": "[parameters('tenantId')]",
+                "copy": [
+                    {
+                        "name": "accessPolicies",
+                        "count": "[length(parameters('objectIDs'))]",
+                        "input": {
+                            "tenantId": "[parameters('tenantId')]",
+                            "objectId": "[parameters('objectIDs')[copyIndex('accessPolicies')]]",
+                            "permissions": {
+                                "secrets": ["get"]
+                            }
+                        }
+                    }
+                ],
+                "sku": {
+                    "name": "standard",
+                    "family": "A"
+                }
+            },
+            "resources": [
+                {
+                    "apiVersion": "2018-02-14",
+                    "type": "Microsoft.KeyVault/vaults/secrets",
+                    "name": "[concat(parameters('keyVaultName'), '/', parameters('lcdbName'), '-cstring')]",
+                    "properties": {
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('lcdbName') , ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('lcdbName')),variables('lcdbApiVersion')).keys[0].value , ';EndpointSuffix=core.windows.net')]"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+                    ]
+                },
+                {
+                    "apiVersion": "2018-02-14",
+                    "type": "Microsoft.KeyVault/vaults/secrets",
+                    "name": "[concat(parameters('keyVaultName'), '/', parameters('gcdbName'), '-cstring')]",
+                    "properties": {
+                        "value": "[concat('AccountEndpoint=https://', parameters('gcdbName'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('gcdbName')), variables('gcdbApiVersion')).primaryMasterKey, ';')]"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+                    ]
+                },
+                {
+                    "apiVersion": "2018-02-14",
+                    "type": "Microsoft.KeyVault/vaults/secrets",
+                    "name": "[concat(parameters('keyVaultName'), '/', parameters('redisName'), '-cstring')]",
+                    "properties": {
+                        "value": "[concat(parameters('redisName'),'redis.cache.windows.net:6380,password=', listKeys(resourceId('Microsoft.Cache/Redis', parameters('redisName')), variables('redisApiVersion')).keys[0].value , ',ssl=True,abortConnect=False')]"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+                    ]
+                },
+                {
+                    "apiVersion": "2018-02-14",
+                    "type": "Microsoft.KeyVault/vaults/secrets",
+                    "name": "[concat(parameters('keyVaultName'), '/sendgridPassword')]",
+                    "properties": {
+                        "value": "[parameters('sendgridPassword')]"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+                    ]
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}

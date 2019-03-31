@@ -1,0 +1,87 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "trafficRoutingMethod": {
+            "defaultValue": "Geographic",
+            "allowedValues": [
+                "Performance",
+                "Weighted",
+                "Priority",
+                "Geographic",
+                "MultiValue",
+                "Subnet"
+            ],
+            "type": "string"
+        },
+        "maxReturn": {
+            "type": "int",
+            "defaultValue": 0
+        },
+        "webAppName":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the web app fetched from master template"
+            }  
+        },
+        "location":{
+            "type": "string",
+            "metadata": {
+                "description": "location from master template"
+            }
+        },
+        "tags":{
+            "type": "object",
+            "metadata": {
+                "description": "tags from master template"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/trafficManagerProfiles",
+            "name": "[parameters('name')]",
+            "apiVersion": "2018-04-01",
+            "location": "global",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "trafficRoutingMethod": "[parameters('trafficRoutingMethod')]",
+                "maxReturn": "[parameters('maxReturn')]",
+                "dnsConfig": {
+                    "relativeName": "[parameters('name')]",
+                    "ttl": "60"
+                },
+                "monitorConfig": {
+                    "profileMonitorStatus": "Online",
+                    "protocol": "HTTPS",
+                    "port": 443,
+                    "path": "/",
+                    "intervalInSeconds": 30,
+                    "toleratedNumberOfFailures": 3,
+                    "timeoutInSeconds": 10
+                },
+                "endpoints": [
+                    {
+                      "name": "[parameters('webAppName')]",
+                      "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+                      "properties": {
+                        "endpointStatus": "Enabled",
+                        "endpointMonitorStatus": "Online",
+                        "targetResourceId": "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+                        "target": "[reference(resourceId('Microsoft.Web/sites', parameters('webAppName')), providers('Microsoft.Web', 'sites').apiVersions[0]).hostNames[0]]",
+                        "weight": 1,
+                        "priority": 1,
+                        "endpointLocation": "[parameters('location')]",
+                        "geoMapping": [
+                          "GEO-EU"
+                        ]
+                      }
+                    }
+                  ]
+            }
+        }
+    ]
+}

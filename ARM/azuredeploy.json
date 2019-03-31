@@ -68,6 +68,13 @@
             "metadata": {
                 "description": "pair location for all cosmosDB"
             }
+        },
+        "sendgridPassword":{
+            "type": "securestring",
+            "defaultValue": "D0ntS4ve1nGit",
+            "metadata": {
+                "description": "password for sendgrid. Will be saved to keyvault, but in production really should not have a default value."
+            }
         }
     },
     "variables": {
@@ -82,15 +89,18 @@
         "tsiUrl": "[concat(uri(deployment().properties.templateLink.uri, 'tsi.json'))]",
         "trafficManagerUrl": "[concat(uri(deployment().properties.templateLink.uri, 'trafficmanager.json'))]",
         "streamanalyticsUrl": "[concat(uri(deployment().properties.templateLink.uri, 'streamanalytics.json'))]",
+        "keyVaultUrl": "[concat(uri(deployment().properties.templateLink.uri, 'keyvault.json'))]",
         "webAppUrl": "[concat(uri(deployment().properties.templateLink.uri, 'webapp.json'))]",
 
         "logSAName":"[concat(variables('prefixInLowerCase'), parameters('location'), 'log')]",
         "tableSAName":"[concat(variables('prefixInLowerCase'), parameters('location'), 'lcdb')]",
+        "tsiSAName":"[concat(variables('prefixInLowerCase'), parameters('location'), 'tsi')]",
         "cosmosDBName":"[concat(variables('prefixInLowerCase'), parameters('location'), 'gcdb')]",
         "webAppName":"[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'front')]",
         "redisName":"[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'redis')]",
         "iotHubName":"[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'hub')]",
         "tsiName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'tsi')]",
+        "keyVaultName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'kv')]",
         "streamAnalyticsName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'stream')]",
         "addFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'add')]",
         "configFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'conf')]",
@@ -133,6 +143,22 @@
                 },
                 "parameters":{
                     "StorageAccountName":{"value": "[variables('tableSAName')]"},
+                    "Location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('tsiSAName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('storageUrl')]"
+                },
+                "parameters":{
+                    "StorageAccountName":{"value": "[variables('tsiSAName')]"},
                     "Location":{"value": "[parameters('location')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
@@ -220,6 +246,7 @@
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
                     "runtime":{"value": "dotnet"},
+                    "keyVaultName":{"value": "[variables('keyVaultName')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -260,6 +287,7 @@
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
                     "runtime":{"value": "dotnet"},
+                    "keyVaultName":{"value": "[variables('keyVaultName')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -305,6 +333,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "keyVaultName":{"value": "[variables('keyVaultName')]"},
                     "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
                 }
@@ -329,6 +358,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "keyVaultName":{"value": "[variables('keyVaultName')]"},
                     "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
                 }
@@ -354,6 +384,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "keyVaultName":{"value": "[variables('keyVaultName')]"},
                     "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
                 }
@@ -377,10 +408,13 @@
                     "name":{"value": "[variables('tsiName')]"},
                     "location":{"value": "[parameters('location')]"},
                     "tags":{"value": "[variables('tags')]" },
-                    "iotHubName":{"value": "[variables('iotHubName')]"}
+                    "iotHubName":{"value": "[variables('iotHubName')]"},
+                    "tsiFunctionObjectID":{"value": "[reference(variables('tsiFunctionAppName')).outputs.ObjectID.value]"},
+                    "storageAccountName":{"value": "[variables('tsiSAName')]"}
                 }
             },
             "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('tsiSAName'))]",
                 "[concat('Microsoft.Resources/deployments/', variables('iotHubName'))]"
             ]
         },
@@ -398,6 +432,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "keyVaultName":{"value": "[variables('keyVaultName')]"},
                     "runtime":{"value": "node"},
                     "tags":{"value": "[variables('tags')]" }
                 }
@@ -425,6 +460,7 @@
                     "redisName":{"value": "[variables('redisName')]"},
                     "gcdbName":{"value": "[variables('cosmosDBName')]"},
                     "lcdbName":{"value": "[variables('tableSAName')]"},
+                    "keyVaultName":{"value": "[variables('keyVaultName')]"},
                     "location":{"value": "[parameters('location')]"}
                 }
             },
@@ -434,6 +470,46 @@
                 "[concat('Microsoft.Resources/deployments/', variables('cosmosDBName'))]",
                 "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]",
                 "[concat('Microsoft.Resources/deployments/', variables('redisName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('keyVaultName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('keyVaultUrl')]"
+                },
+                "parameters":{
+                    "keyVaultName": {"value": "[variables('keyVaultName')]"},
+                    "tenantId": {"value": "[reference(variables('webAppName')).outputs.tenantId.value]"},
+                    "objectIDs": {"value": [
+                        "[reference(variables('webAppName')).outputs.ObjectID.value]",
+                        "[reference(variables('addFunctionAppName')).outputs.ObjectID.value]",
+                        "[reference(variables('configFunctionAppName')).outputs.ObjectID.value]",
+                        "[reference(variables('notificationFunctionAppName')).outputs.ObjectID.value]",
+                        "[reference(variables('scaleFunctionAppName')).outputs.ObjectID.value]",
+                        "[reference(variables('tsiFunctionAppName')).outputs.ObjectID.value]",
+                        "[reference(variables('validateFunctionAppName')).outputs.ObjectID.value]"
+                    ]},
+                    "redisName":{"value": "[variables('redisName')]"},
+                    "gcdbName":{"value": "[variables('cosmosDBName')]"},
+                    "lcdbName":{"value": "[variables('tableSAName')]"},
+                    "sendgridPassword":{"value": "[parameters('sendgridPassword')]"}
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('webAppName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('addFunctionAppName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('configFunctionAppName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('notificationFunctionAppName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('scaleFunctionAppName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('tsiFunctionAppName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('validateFunctionAppName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('redisName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('cosmosDBName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('tableSAName'))]"
             ]
         },
         {

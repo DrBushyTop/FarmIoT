@@ -1,0 +1,76 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "plan_name": {
+            "type": "string",
+            "defaultValue": "free",
+            "allowedValues": [
+                "free",
+                "bronze",
+                "silver"
+            ]
+        },
+        "plan_promotion_code": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "password": {
+            "type": "securestring"
+        },
+        "email": {
+            "type": "string",
+            "defaultValue": "noreply@company.com"
+        },
+        "firstName": {
+            "type": "string",
+            "defaultValue": "Company"
+        },
+        "lastName": {
+            "type": "string",
+            "defaultValue": "Admin"
+        },
+        "company": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "website": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": ""
+        }
+    },
+    "resources": [
+        {
+            "type": "Sendgrid.Email/accounts",
+            "name": "[parameters('name')]",
+            "apiVersion": "2015-01-01",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('tags')]",
+            "plan": {
+                "name": "[parameters('plan_name')]",
+                "publisher": "Sendgrid",
+                "product": "sendgrid_azure",
+                "promotionCode": "[parameters('plan_promotion_code')]"
+            },
+            "properties": {
+                "password": "[parameters('password')]",
+                "acceptMarketingEmails": false,
+                "email": "[parameters('email')]",
+                "firstName": "[parameters('firstName')]",
+                "lastName": "[parameters('lastName')]",
+                "company": "[parameters('company')]",
+                "website": "[parameters('website')]"
+            }
+        }
+    ]
+}

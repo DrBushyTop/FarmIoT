@@ -20,6 +20,12 @@
                 "description": "logSAName from master template"
             }
         },
+        "keyVaultName":{
+          "type": "string",
+          "metadata": {
+              "description": "keyVaultName from master template"
+          }
+        },
         "runtime":{
           "type": "string",
           "allowedValues": [
@@ -36,12 +42,6 @@
             "type": "string",
             "metadata": {
                 "description": "Location from master template"
-            }
-        },
-        "extravars":{
-            "type": "string",
-            "metadata": {
-                "description": "Extra variable from master template"
             }
         },
         "tags": {
@@ -120,8 +120,8 @@
                     "value": "[parameters('runtime')]"
                   },
                   {
-                    "name": "FUNCTIONS_WORKER_RUNTIME",
-                    "value": "[parameters('extravars')]"
+                    "name": "keyvaulturl",
+                    "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]"
                   }
                 ]
               }
@@ -132,6 +132,10 @@
         "ObjectID":{
             "type": "string",
             "value": "[reference(variables('resourceID'), variables('apiVersion'), 'Full').identity.principalId]"
-        }
+        },
+        "TenantID":{
+          "type": "string",
+          "value": "[reference(variables('resourceID'), variables('apiVersion'), 'Full').identity.tenantId]"
+      }
     }
 }

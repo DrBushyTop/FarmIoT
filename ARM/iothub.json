@@ -92,7 +92,7 @@
                     {
                       "applyAllocationPolicy": false,
                       "allocationWeight": 100,
-                      "connectionString": "[listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', parameters('name'), 'iothubowner'), '2016-02-03').keys[3]]",
+                      "connectionString": "[listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', parameters('name'), 'iothubowner'), '2016-02-03').keys[2].value]",
                       "location": "[parameters('location')]"
                     }
                 ],

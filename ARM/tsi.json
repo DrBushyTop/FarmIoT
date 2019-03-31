@@ -1,0 +1,100 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "iotHubName": {
+      "type": "string"
+    },
+    "consumerGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "comsumergroup name from the iothub"
+      }
+    },
+    "tsiFunctionObjectID": {
+      "type": "string"
+    },
+    "storageAccountName": {
+      "type": "string"
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "L1"
+    },
+    "capacity": {
+      "type": "string",
+      "defaultValue": "1"
+    },
+    "dataRetentionTime": {
+      "type": "string",
+      "defaultValue": "1"
+    },
+    "tags": {
+      "type": "object"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.TimeSeriesInsights/environments",
+      "name": "[parameters('name')]",
+      "apiVersion": "2018-08-15-preview",
+      "location": "[parameters('location')]",
+      "properties": {
+        "dataRetentionTime": "[parameters('dataRetentionTime')]",
+        "storageConfiguration": {
+          "accountName": "[parameters('storageAccountName')]",
+          "managementKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2018-02-01').keys[0].value]"
+        }
+      },
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "capacity": "[parameters('capacity')]"
+      },
+      "tags": "[parameters('tags')]",
+      "resources": [
+        {
+          "type": "eventsources",
+          "name": "[concat('timeseries/',parameters('iotHubName'))]",
+          "apiVersion": "2018-08-15-preview",
+          "location": "[parameters('location')]",
+          "kind": "Microsoft.IoTHub",
+          "properties": {
+            "eventSourceResourceId": "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
+            "iotHubName": "[parameters('iotHubName')]",
+            "consumerGroupName": "[parameters('consumerGroup')]",
+            "keyName": "device",
+            "sharedAccessKey": "[listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', parameters('name'), 'iothubowner'), '2016-02-03').keys[0].value]",
+            "timestampPropertyName": ""
+          },
+          "tags": "[parameters('tags')]",
+          "dependsOn": [
+            "[concat('Microsoft.TimeSeriesInsights/environments/', parameters('name'))]"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.TimeSeriesInsights/environments/accessPolicies",
+      "name": "[concat(parameters('name'), '/', 'apiAccessPolicy')]",
+      "apiVersion": "2018-08-15-preview",
+      "properties": {
+        "principalObjectId": "[parameters('tsiFunctionObjectID')]",
+        "roles": [
+          "Reader",
+          "Contributor"
+        ]
+      },
+      "dependsOn": [
+        "[concat('Microsoft.TimeSeriesInsights/environments/', parameters('name'))]"
+      ]
+    }
+  ],
+  "outputs": {}
+}
