@@ -433,6 +433,7 @@
                     "location":{"value": "[parameters('location')]"},
                     "tags":{"value": "[variables('tags')]" },
                     "iotHubName":{"value": "[variables('iotHubName')]"},
+                    "consumerGroup":{"value": "[reference(variables('iotHubName')).outputs.consumerGroupName.value]"},
                     "tsiFunctionObjectID":{"value": "[reference(variables('tsiFunctionAppName')).outputs.ObjectID.value]"},
                     "storageAccountName":{"value": "[variables('tsiSAName')]"}
                 }
