@@ -31,10 +31,6 @@
       "type": "string",
       "defaultValue": "1"
     },
-    "dataRetentionTime": {
-      "type": "string",
-      "defaultValue": "1"
-    },
     "tags": {
       "type": "object"
     }
@@ -50,7 +46,6 @@
       "location": "[parameters('location')]",
       "kind": "LongTerm",
       "properties": {
-        "dataRetentionTime": "[parameters('dataRetentionTime')]",
         "storageConfiguration": {
           "accountName": "[parameters('storageAccountName')]",
           "managementKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2018-02-01').keys[0].value]"
