@@ -40,7 +40,7 @@
         }
     },
     "variables": {
-        "consumerGroupName": "cg1",
+        "consumerGroupName": "[concat(parameters('name'), '/events/consumergroup1')]",
         "provisionServiceName": "[concat(parameters('name'), 'prov')]"
     },
     "resources": [
