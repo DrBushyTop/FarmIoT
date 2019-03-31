@@ -24,7 +24,9 @@
             "type": "object"
         }
     },
-    "variables": {},
+    "variables": {
+      "splitConsumerGroup": "[split(parameters('consumerGroup'), '/')]"
+    },
     "resources": [
         {
             "name": "[parameters('name')]",
@@ -52,7 +54,7 @@
                           "iotHubNamespace": "[parameters('iotHubName')]",
                           "sharedAccessPolicyName": "service",
                           "endpoint": "messages/events",
-                          "consumerGroupName": "[parameters('consumerGroup')]"
+                          "consumerGroupName": "[variables('splitConsumerGroup')[2]]"
                       }
                     }
                   }
