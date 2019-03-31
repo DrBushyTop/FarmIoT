@@ -22,14 +22,15 @@ Short excercise for a Agriculture IoT solution
 
 ## General
 
-- This template deployment defaults to a small P1 redis cluster, which in itself costs 700€/month. Please destroy the resources when needed.
+- This template deployment defaults to a small P1 redis cluster, which in itself costs 700€/month. Please destroy the resources when needed. The parameters are mostly for example purposes only, smallest possible to enable required features.
 - Azure AD is assumed to exist already
 - The templates only deploy one region of the application. Small tweaks will be needed for multiregion deployments. For example traffic manager & cosmosDB replication need to be adjusted.
 - Telemetry from all functions & app service go to the Application insights instance in the region. It's worth considering either having a single instance in one region, or creating a central place for logs where all the app insights instances stream to (requires custom setup).
 - App service needs to be at least a standard sku to allow for autoscaling. Currently set to scale out at 70% cpu use, scale in at 10% cpu use. Both averaging in the last 10 minutes. 
 - Customer DBs do not have autoscaling, but a primitive version for cosmosDB could be implemented with Cosmonaut: https://chapsas.com/cosmosdb-action-level-autoscaling-with-cosmonaut/
 - Separating the functions into multiple function apps raises the complexity of the solution, but will allow the functions to scale independent of each other.
-- The parameters are mostly for example purposes only.
+- Data is kept in the appropriate regions by utilizing LRS / ZRS replication in storage accounts, and pairing CosmosDB etc. storage only withtin their respective partner regions (West Europe + North Europe in this case).
+- Function app contents are out of scope for these templates. Their code would be deployed via a CI/CD pipeline etc. 
 - Twilio is not in scope of the deployment, but would handle the SMS sending in the notification function app.
 
 
@@ -40,7 +41,7 @@ Short excercise for a Agriculture IoT solution
 - Enrollment groups for device provisioning service could be created as part of a new customer onboarding action (out of scope for this task)
 - Web app can be written in node.js or C# for example. As it will be mostly calling for webhooks of the functions.
 - Time series API only has a javascript client library, so the API functions would be easiest to create using that.
-- Notification function can also be node or C#. Twilio and sendgrid support both.
+- Notification function can also be node or C#. Twilio and sendgrid support both. Same goes for all the other functions not yet mentioned.
  
 ## Deployment flow
 - Base (Storage accounts, AppInsights, Databases)
