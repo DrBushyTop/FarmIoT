@@ -306,7 +306,7 @@
                     "uri": "[variables('streamanalyticsUrl')]"
                 },
                 "parameters":{
-                    "name":{"value": "[variables('notificationFunctionAppName')]"},
+                    "name":{"value": "[variables('streamAnalyticsName')]"},
                     "location":{"value": "[parameters('location')]"},
                     "iotHubName":{"value": "[variables('iotHubName')]"},
                     "notificationFuncName": "[variables('notificationFunctionAppName')]",
