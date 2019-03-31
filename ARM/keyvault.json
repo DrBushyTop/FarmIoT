@@ -44,6 +44,12 @@
                 "description": "password for sendgrid. Will be saved to keyvault, but in production really should not have a default value."
             }
         },
+        "location":{
+            "type": "string",
+            "metadata": {
+                "description": "westeurope"
+            }
+        },
         "tags":{
             "type": "object",
             "defaultValue": ""
@@ -59,7 +65,7 @@
            "type": "Microsoft.KeyVault/vaults",
            "apiVersion": "2018-02-14",
            "name": "[parameters('keyVaultName')]",
-           "location": "[resourceGroup().location]",
+           "location": "[parameters('location')]",
            "tags": "[parameters('tags')]",
            "properties": {
                 "enabledForDeployment": true,

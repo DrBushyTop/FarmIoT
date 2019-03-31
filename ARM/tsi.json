@@ -39,7 +39,9 @@
       "type": "object"
     }
   },
-  "variables": {},
+  "variables": {
+    "splitConsumerGroup": "[split(parameters('consumerGroup'), '/')]"
+  },
   "resources": [
     {
       "type": "Microsoft.TimeSeriesInsights/environments",
@@ -61,16 +63,16 @@
       "resources": [
         {
           "type": "eventsources",
-          "name": "[concat('timeseries/',parameters('iotHubName'))]",
+          "name": "[parameters('iotHubName')]",
           "apiVersion": "2018-08-15-preview",
           "location": "[parameters('location')]",
           "kind": "Microsoft.IoTHub",
           "properties": {
             "eventSourceResourceId": "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
             "iotHubName": "[parameters('iotHubName')]",
-            "consumerGroupName": "[parameters('consumerGroup')]",
+            "consumerGroupName": "[variables('splitConsumerGroup')[2]]",
             "keyName": "device",
-            "sharedAccessKey": "[listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', parameters('name'), 'iothubowner'), '2016-02-03').keys[0].value]",
+            "sharedAccessKey": "[listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', parameters('name'), 'device'), '2016-02-03').primaryKey]",
             "timestampPropertyName": ""
           },
           "tags": "[parameters('tags')]",
