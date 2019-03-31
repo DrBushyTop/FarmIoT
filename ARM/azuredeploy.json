@@ -309,6 +309,7 @@
                     "name":{"value": "[variables('streamAnalyticsName')]"},
                     "location":{"value": "[parameters('location')]"},
                     "iotHubName":{"value": "[variables('iotHubName')]"},
+                    "consumerGroup":{"value": "[reference(variables('iotHubName')).outputs.consumerGroupName.value]"},
                     "notificationFunctionAppName": {"value":"[variables('notificationFunctionAppName')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
@@ -523,6 +524,7 @@
                     "uri": "[variables('trafficManagerUrl')]"
                 },
                 "parameters":{
+                    "name": {"value": "[variables('trafficManagerName')]"},
                     "webAppName": {"value": "[variables('webAppName')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
