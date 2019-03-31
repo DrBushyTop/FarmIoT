@@ -82,8 +82,7 @@
             "kind": "functionapp",
             "tags": "[parameters('tags')]",
             "dependsOn": [
-              "[resourceId('Microsoft.Web/serverfarms', variables('funcPlanName'))]",
-              "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+              "[resourceId('Microsoft.Web/serverfarms', variables('funcPlanName'))]"
             ],
             "identity":{
                 "type": "SystemAssigned"
