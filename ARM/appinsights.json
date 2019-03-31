@@ -13,6 +13,9 @@
             "metadata": {
                 "description": "Location from master template"
             }
+        },
+        "tags": {
+            "type": "object"
         }
     },
     "variables": {
@@ -23,7 +26,7 @@
             "name": "[parameters('appInsightsName')]",
             "type": "Microsoft.Insights/components",
             "location": "[parameters('location')]",
-            "tags": {},
+            "tags": "[parameters('tags')]",
             "properties": {
                 "applicationId": "[parameters('appInsightsName')]"
             }

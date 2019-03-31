@@ -14,6 +14,9 @@
             "metadata": {
                 "description": "Location from master template"
             }
+        },
+        "tags":{
+            "type": "object"
         }
     },
     "variables": {},
@@ -29,7 +32,8 @@
             "location": "[parameters('location')]",
             "properties": {
                 "supportsHttpsTrafficOnly": true
-            }
+            },
+            "tags": "[parameters('tags')]"
         }
     ],
     "outputs": {}

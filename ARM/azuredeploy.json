@@ -12,7 +12,7 @@
         },
         "environment":{
             "type": "string",
-            "defaultValue": "prod",
+            "defaultValue": "test",
             "allowedValues": [
                 "dev",
                 "test",
@@ -62,6 +62,13 @@
                 "description": "location for all resources"
             }
         },
+        "pairedLocation":{
+            "type": "string",
+            "defaultValue": "northeurope",
+            "metadata": {
+                "description": "pair location for all cosmosDB"
+            }
+        },
         "password":{
             "type": "securestring",
             "defaultValue": "n0cr3ds1nr3p05!",
@@ -82,6 +89,7 @@
         "functionUrl": "[concat(uri(deployment().properties.templateLink.uri, 'function.json'))]",
         "tsiUrl": "[concat(uri(deployment().properties.templateLink.uri, 'tsi.json'))]",
         "trafficManagerUrl": "[concat(uri(deployment().properties.templateLink.uri, 'trafficmanager.json'))]",
+        "streamanalyticsUrl": "[concat(uri(deployment().properties.templateLink.uri, 'streamanalytics.json'))]",
         "webAppUrl": "[concat(uri(deployment().properties.templateLink.uri, 'webapp.json'))]",
 
         "logSAName":"[concat(variables('prefixInLowerCase'), parameters('location'), 'log')]",
@@ -91,6 +99,7 @@
         "redisName":"[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'redis')]",
         "iotHubName":"[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'hub')]",
         "tsiName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'tsi')]",
+        "streamAnalyticsName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'stream')]",
         "addFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'add')]",
         "configFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'conf')]",
         "validateFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'validate')]",
@@ -165,7 +174,7 @@
                 "parameters":{
                     "name":{"value": "[variables('redisName')]"},
                     "sku":{"value": "[parameters('redisSku')]"},
-                    "shardcount":{"value": "[parameters('redisSku')]"},
+                    "shardcount":{"value": "[parameters('redisShardCount')]"},
                     "location":{"value": "[parameters('location')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
@@ -183,6 +192,7 @@
                 "parameters":{
                     "name":{"value": "[variables('logSAName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "pairedlocation": {"value": "[parameters('pairedLocation')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             }
@@ -217,6 +227,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -257,6 +268,7 @@
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "extravars": {"value": "[parameters('password')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -264,6 +276,28 @@
                 "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
                 "[concat('Microsoft.Resources/deployments/', variables('sendGridName'))]",
                 "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('streamAnalyticsName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('functionUrl')]"
+                },
+                "parameters":{
+                    "name":{"value": "[variables('notificationFunctionAppName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "iotHubName":{"value": "[variables('iotHubName')]"},
+                    "notificationFuncName": "[variables('notificationFunctionAppName')]",
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('sendGridName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('notificationFunctionAppName'))]"
             ]
         },
         {
@@ -280,6 +314,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -303,6 +338,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -327,6 +363,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -370,6 +407,7 @@
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
+                    "runtime":{"value": "node"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -426,5 +464,53 @@
         }
     ],
     "outputs": {
+        "logSAName":{
+            "type": "string",
+            "value": "[variables('logSAName')]"
+        },
+        "tableSAName":{
+            "type": "string",
+            "value": "[variables('tableSAName')]"
+        },
+        "webAppName":{
+            "type": "string",
+            "value": "[variables('webAppName')]"
+        },
+        "addFunctionAppName":{
+            "type": "string",
+            "value": "[variables('addFunctionAppName')]"
+        },
+        "configFunctionAppName":{
+            "type": "string",
+            "value": "[variables('configFunctionAppName')]"
+        },
+        "notificationFunctionAppName":{
+            "type": "string",
+            "value": "[variables('notificationFunctionAppName')]"
+        },
+        "scaleFunctionAppName":{
+            "type": "string",
+            "value": "[variables('scaleFunctionAppName')]"
+        },
+        "validateFunctionAppName":{
+            "type": "string",
+            "value": "[variables('validateFunctionAppName')]"
+        },
+        "iotHubName":{
+            "type": "string",
+            "value": "[variables('iotHubName')]"
+        },
+        "cosmosDBName":{
+            "type": "string",
+            "value": "[variables('cosmosDBName')]"
+        },
+        "redisName":{
+            "type": "string",
+            "value": "[variables('redisName')]"
+        },
+        "appInsightsName":{
+            "type": "string",
+            "value": "[variables('appInsightsName')]"
+        }
     }
 }

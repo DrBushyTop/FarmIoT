@@ -1,0 +1,72 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "kind": {
+            "type": "string",
+            "defaultValue": "MongoDB",
+            "metadata": {
+                "description": "API that the DB will use"
+            }
+        },
+        "consistencyPolicy": {
+            "type": "object",
+            "defaultValue": {
+                "defaultConsistencyLevel": "Session",
+                "maxIntervalInSeconds": 5,
+                "maxStalenessPrefix": 100
+            }   
+        },
+        "pairedLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "location to pair the database with"
+            }
+        },
+        "tags": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "locationName": "[if(contains(parameters('location'), ' '), tolower(concat(split(parameters('location'), ' '))), parameters('location'))]",
+        "pairedLocationName": "[if(contains(parameters('location'), ' '), tolower(concat(split(parameters('pairedLocation'), ' '))), parameters('pairedLocation'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts",
+            "kind": "[parameters('kind')]",
+            "name": "[parameters('name')]",
+            "apiVersion": "2015-04-08",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "databaseAccountOfferType": "Standard",
+                "locations": [
+                    {
+                        "id": "[concat(parameters('name'), '-', parameters('location'))]",
+                        "failoverPriority": 0,
+                        "locationName": "[variables('locationName')]"
+                    },
+                    {
+                        "id": "[concat(parameters('name'), '-', parameters('pairedLocation'))]",
+                        "failoverPriority": 1,
+                        "locationName": "[variables('pairedLocationName')]"
+                    }
+                ],
+                "consistencyPolicy": "[parameters('consistencyPolicy')]",
+                "enableMultipleWriteLocations": false,
+                "isVirtualNetworkFilterEnabled": false,
+                "virtualNetworkRules": [],
+                "ipRangeFilter": "",
+                "dependsOn": []
+            }
+        }
+    ],
+    "outputs": {}
+}

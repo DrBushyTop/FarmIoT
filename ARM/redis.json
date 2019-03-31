@@ -31,6 +31,9 @@
             "metadata": {
                 "description": "Location from master template"
             }
+        },
+        "tags": {
+            "type": "object"
         }
     },
     "resources": [
@@ -44,7 +47,8 @@
                 "redisConfiguration": {},
                 "enableNonSslPort": false,
                 "shardCount": "[parameters('shardcount')]"
-            }
+            },
+            "tags": "[parameters('tags')]"
         }
     ]
 }

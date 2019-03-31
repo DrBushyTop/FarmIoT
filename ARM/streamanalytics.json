@@ -1,0 +1,81 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "iotHubName": {
+            "type": "string"
+        },
+        "consumerGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "comsumergroup name from the iothub"
+            }
+        },
+        "notificationFunctionAppNAme": {
+            "type": "string"
+        },
+        "tags": {
+            "type": "object"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "string",
+            "type": "Microsoft.StreamAnalytics/streamingjobs",
+            "apiVersion": "2016-03-01",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+              "sku": {
+                "name": "Standard"
+              },
+              "eventsOutOfOrderPolicy": "Adjust",
+              "outputErrorPolicy": "Stop",
+              "eventsOutOfOrderMaxDelayInSeconds": 0,
+              "eventsLateArrivalMaxDelayInSeconds": 5,
+              "dataLocale": "en-US",
+              "inputs": [
+                {
+                  "name": "[parameters('iotHubName')]",
+                  "properties": {
+                    "type": "Stream",
+                    "datasource": {
+                      "type": "Microsoft.Devices/IotHubs",
+                      "properties": {
+                          "iotHubNamespace": "[parameters('iotHubName')]",
+                          "sharedAccessPolicyName": "service",
+                          "endpoint": "messages/events",
+                          "consumerGroupName": "[parameters('consumerGroup')]"
+                      }
+                    }
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "configurationchange",
+                  "properties": {
+                    "datasource": {
+                      "type": "Microsoft.AzureFunction",
+                      "properties": {
+                        "functionAppName": "[parameters('notificationFunctionAppNAme')]",
+                        "functionName": "PLACEHOLDER",
+                        "apiKey": null
+                      }
+                    }
+                  }
+                }
+              ],
+              "functions": []
+            }
+          }
+    ],
+    "outputs": {}
+}

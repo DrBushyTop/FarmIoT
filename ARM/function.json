@@ -1,0 +1,137 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "functionAppName":{
+            "type": "string",
+            "metadata": {
+                "description": "functionAppName from master template"
+            }
+        },
+        "appInsightsName":{
+            "type": "string",
+            "metadata": {
+                "description": "AppInsights name from master template"
+            }
+        },
+        "logSAName":{
+            "type": "string",
+            "metadata": {
+                "description": "logSAName from master template"
+            }
+        },
+        "runtime":{
+          "type": "string",
+          "allowedValues": [
+            "node",
+            "dotnet",
+            "java"
+
+          ],
+          "metadata": {
+              "description": "runtime from master template"
+          }
+        },
+        "location":{
+            "type": "string",
+            "metadata": {
+                "description": "Location from master template"
+            }
+        },
+        "extravars":{
+            "type": "string",
+            "metadata": {
+                "description": "Extra variable from master template"
+            }
+        },
+        "tags": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "logSAId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', parameters('logSAName'))]",
+        "funcPlanName": "[concat(parameters('location'),'plan')]",
+        "resourceID": "[concat('Microsoft.Web/sites/', parameters('functionAppName'))]",
+        "apiVersion": "[providers('Microsoft.Web', 'sites').apiVersions[0]]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2016-09-01",
+            "name": "[variables('funcPlanName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+              "name": "[variables('funcPlanName')]",
+              "computeMode": "Dynamic"
+            },
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y",
+                "capacity": 0
+            },
+            "tags": "[parameters('tags')]"
+        },
+        {
+            "apiVersion": "2016-08-01",
+            "type": "Microsoft.Web/sites",
+            "name": "[parameters('functionAppName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "functionapp",
+            "tags": "[parameters('tags')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.Web/serverfarms', variables('funcPlanName'))]",
+              "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+            ],
+            "identity":{
+                "type": "SystemAssigned"
+            },
+            "properties": {
+              "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('funcPlanName'))]",
+              "siteConfig": {
+                "appSettings": [
+                  {
+                    "name": "AzureWebJobsStorage",
+                    "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('logSAName'), ';AccountKey=', listKeys(variables('logSAId'),'2015-05-01-preview').key1)]"
+                  },
+                  {
+                    "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                    "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('logSAName'), ';AccountKey=', listKeys(variables('logSAId'),'2015-05-01-preview').key1)]"
+                  },
+                  {
+                    "name": "WEBSITE_CONTENTSHARE",
+                    "value": "[parameters('functionAppName')]"
+                  },
+                  {
+                    "name": "FUNCTIONS_EXTENSION_VERSION",
+                    "value": "~2"
+                  },
+                  {
+                    "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                    "value": "10.14.1"
+                  },
+                  {
+                    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                    "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName'))).InstrumentationKey]"
+                  },
+                  {
+                    "name": "FUNCTIONS_WORKER_RUNTIME",
+                    "value": "[parameters('runtime')]"
+                  },
+                  {
+                    "name": "FUNCTIONS_WORKER_RUNTIME",
+                    "value": "[parameters('extravars')]"
+                  }
+                ]
+              }
+            }
+        }
+    ],
+    "outputs": {
+        "ObjectID":{
+            "type": "string",
+            "value": "[reference(variables('resourceID'), variables('apiVersion'), 'Full').identity.principalId]"
+        }
+    }
+}
