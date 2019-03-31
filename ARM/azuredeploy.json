@@ -498,6 +498,7 @@
                     "gcdbName":{"value": "[variables('cosmosDBName')]"},
                     "lcdbName":{"value": "[variables('tableSAName')]"},
                     "sendgridPassword":{"value": "[parameters('sendgridPassword')]"},
+                    "location":{"value": "[parameters('location')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
@@ -526,6 +527,7 @@
                 "parameters":{
                     "name": {"value": "[variables('trafficManagerName')]"},
                     "webAppName": {"value": "[variables('webAppName')]"},
+                    "location":{"value": "[parameters('location')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },
