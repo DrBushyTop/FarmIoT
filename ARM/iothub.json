@@ -120,7 +120,7 @@
         },
         "consumerGroupName": {
             "value": "[variables('consumerGroupName')]",
-            "type": "object"
+            "type": "string"
         }
     }
 }
