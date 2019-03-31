@@ -68,15 +68,7 @@
             "metadata": {
                 "description": "pair location for all cosmosDB"
             }
-        },
-        "password":{
-            "type": "securestring",
-            "defaultValue": "n0cr3ds1nr3p05!",
-            "metadata": {
-                "description": "Password for everything that needs one in this demo. This should really be fetched from a keyvault etc instead, but for simplicity's sake it's here."
-            }
         }
-        
     },
     "variables": {
         "prefixInLowerCase":"[tolower(parameters('resourceNamingPrefix'))]",
@@ -266,7 +258,6 @@
                     "functionAppName":{"value": "[variables('notificationFunctionAppName')]"},
                     "logSAName":{"value": "[variables('logSAName')]"},
                     "appInsightsName":{"value": "[variables('appInsightsName')]"},
-                    "extravars": {"value": "[parameters('password')]"},
                     "location":{"value": "[parameters('location')]"},
                     "runtime":{"value": "dotnet"},
                     "tags":{"value": "[variables('tags')]" }
@@ -285,7 +276,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink":{
-                    "uri": "[variables('functionUrl')]"
+                    "uri": "[variables('streamanalyticsUrl')]"
                 },
                 "parameters":{
                     "name":{"value": "[variables('notificationFunctionAppName')]"},
