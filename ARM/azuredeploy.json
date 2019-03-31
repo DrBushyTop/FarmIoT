@@ -397,29 +397,6 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[variables('tsiName')]",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink":{
-                    "uri": "[variables('tsiUrl')]"
-                },
-                "parameters":{
-                    "name":{"value": "[variables('tsiName')]"},
-                    "location":{"value": "[parameters('location')]"},
-                    "tags":{"value": "[variables('tags')]" },
-                    "iotHubName":{"value": "[variables('iotHubName')]"},
-                    "tsiFunctionObjectID":{"value": "[reference(variables('tsiFunctionAppName')).outputs.ObjectID.value]"},
-                    "storageAccountName":{"value": "[variables('tsiSAName')]"}
-                }
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Resources/deployments/', variables('tsiSAName'))]",
-                "[concat('Microsoft.Resources/deployments/', variables('iotHubName'))]"
-            ]
-        },
-        {
-            "apiVersion": "2017-05-10",
             "name": "[variables('tsiFunctionAppName')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -439,8 +416,31 @@
             },
             "dependsOn": [
                 "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
-                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]",
-                "[concat('Microsoft.Resources/deployments/', variables('tsiName'))]"
+                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('tsiName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('tsiUrl')]"
+                },
+                "parameters":{
+                    "name":{"value": "[variables('tsiName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" },
+                    "iotHubName":{"value": "[variables('iotHubName')]"},
+                    "tsiFunctionObjectID":{"value": "[reference(variables('tsiFunctionAppName')).outputs.ObjectID.value]"},
+                    "storageAccountName":{"value": "[variables('tsiSAName')]"}
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('tsiSAName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('iotHubName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('tsiFunctionAppName'))]"
             ]
         },
         {
