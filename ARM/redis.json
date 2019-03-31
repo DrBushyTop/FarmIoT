@@ -1,0 +1,50 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name":{
+            "type": "string",
+            "metadata": {
+                "description": "Redis name from master template"
+            }
+        },
+        "location":{
+            "type": "string",
+            "metadata": {
+                "description": "Location from master template"
+            }
+        },
+        "sku":{
+            "type": "object",
+            "defaultValue": {
+                "name": "Premium",
+                "family": "P",
+                "capacity": 1
+            },
+            "metadata": {
+                "description": "SKU object from master template"
+            }
+        },
+        "shardcount":{
+            "type": "string",
+            "defaultValue": "2",
+            "metadata": {
+                "description": "Location from master template"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Cache/Redis",
+            "name": "[parameters('name')]",
+            "apiVersion": "2018-03-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "sku": "[parameters('sku')]",
+                "redisConfiguration": {},
+                "enableNonSslPort": false,
+                "shardCount": "[parameters('shardcount')]"
+            }
+        }
+    ]
+}

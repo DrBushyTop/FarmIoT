@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName":{
+            "type": "string"
+        },
+        "sku":{
+            "type": "string",
+            "defaultValue": "Standard_LRS"
+        },
+        "location":{
+            "type": "string",
+            "metadata": {
+                "description": "Location from master template"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storageAccountName')]",
+            "apiVersion": "2018-02-01",
+            "kind": "StorageV2",
+            "sku":{
+                "name": "[parameters('sku')]"
+            },
+            "location": "[parameters('location')]",
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            }
+        }
+    ],
+    "outputs": {}
+}

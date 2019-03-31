@@ -1,0 +1,430 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceNamingPrefix":{
+            "type": "string",
+            "defaultValue": "farmiot",
+            "maxLength": 12,
+            "metadata": {
+                "description": "Prefix for naming the resources"
+            }
+        },
+        "environment":{
+            "type": "string",
+            "defaultValue": "prod",
+            "allowedValues": [
+                "dev",
+                "test",
+                "qa",
+                "prod",
+                "sandbox",
+                "poc"
+            ],
+            "metadata": {
+                "description": "The environment of the deployment. Eg. prod/dev/poc/test"
+            }
+        },
+        "webAppPlanSKU":{
+            "type": "string",
+            "defaultValue": "S1",
+            "allowedValues": [
+                "S1",
+                "S2",
+                "S3"
+            ],
+            "metadata": {
+                "description": "Size of the Web App Plan for the web front"
+            }
+        },
+        "redisSku":{
+            "type": "object",
+            "defaultValue": {
+                "name": "Premium",
+                "family": "P",
+                "capacity": 1
+            },
+            "metadata": {
+                "description": "SKU of the redis instance"
+            }
+        },
+        "redisShardCount":{
+            "type": "string",
+            "defaultValue": "2",
+            "metadata": {
+                "description": "Number of nodes in redis cluster"
+            }
+        },
+        "location":{
+            "type": "string",
+            "defaultValue": "westeurope",
+            "metadata": {
+                "description": "location for all resources"
+            }
+        },
+        "password":{
+            "type": "securestring",
+            "defaultValue": "n0cr3ds1nr3p05!",
+            "metadata": {
+                "description": "Password for everything that needs one in this demo. This should really be fetched from a keyvault etc instead, but for simplicity's sake it's here."
+            }
+        }
+        
+    },
+    "variables": {
+        "prefixInLowerCase":"[tolower(parameters('resourceNamingPrefix'))]",
+        "storageUrl": "[concat(uri(deployment().properties.templateLink.uri, 'storage.json'))]",
+        "appInsightsUrl": "[concat(uri(deployment().properties.templateLink.uri, 'appinsights.json'))]",
+        "iotHubUrl": "[concat(uri(deployment().properties.templateLink.uri, 'iothub.json'))]",
+        "cosmosUrl": "[concat(uri(deployment().properties.templateLink.uri, 'cosmos.json'))]",
+        "redisUrl": "[concat(uri(deployment().properties.templateLink.uri, 'redis.json'))]",
+        "sendgridUrl": "[concat(uri(deployment().properties.templateLink.uri, 'sendgrid.json'))]",
+        "functionUrl": "[concat(uri(deployment().properties.templateLink.uri, 'function.json'))]",
+        "tsiUrl": "[concat(uri(deployment().properties.templateLink.uri, 'tsi.json'))]",
+        "trafficManagerUrl": "[concat(uri(deployment().properties.templateLink.uri, 'trafficmanager.json'))]",
+        "webAppUrl": "[concat(uri(deployment().properties.templateLink.uri, 'webapp.json'))]",
+
+        "logSAName":"[concat(variables('prefixInLowerCase'), parameters('location'), 'log')]",
+        "tableSAName":"[concat(variables('prefixInLowerCase'), parameters('location'), 'lcdb')]",
+        "cosmosDBName":"[concat(variables('prefixInLowerCase'), parameters('location'), 'gcdb')]",
+        "webAppName":"[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'front')]",
+        "redisName":"[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'redis')]",
+        "iotHubName":"[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'hub')]",
+        "tsiName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'tsi')]",
+        "addFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'add')]",
+        "configFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'conf')]",
+        "validateFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'validate')]",
+        "notificationFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'notify')]",
+        "tsiFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'tsiapi')]",
+        "scaleFunctionAppName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'scale')]",
+        "appInsightsName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'appinsights')]",
+        "trafficManagerName": "[concat(variables('prefixInLowerCase'), '-', 'tm')]",
+        "sendGridName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'sg')]",
+        "tags": [
+            {"environment": "[parameters('environment')]"}
+        ]
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('logSAName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('storageUrl')]"
+                },
+                "parameters":{
+                    "StorageAccountName":{"value": "[variables('logSAName')]"},
+                    "Location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('tableSAName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('storageUrl')]"
+                },
+                "parameters":{
+                    "StorageAccountName":{"value": "[variables('tableSAName')]"},
+                    "Location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('appinsightsName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('appInsightsUrl')]"
+                },
+                "parameters":{
+                    "name":{"value": "[variables('appInsightsName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('redisName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('redisUrl')]"
+                },
+                "parameters":{
+                    "name":{"value": "[variables('redisName')]"},
+                    "sku":{"value": "[parameters('redisSku')]"},
+                    "shardcount":{"value": "[parameters('redisSku')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('cosmosDBName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('cosmosUrl')]"
+                },
+                "parameters":{
+                    "name":{"value": "[variables('logSAName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('iotHubName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('iotHubUrl')]"
+                },
+                "parameters":{
+                    "name":{"value": "[variables('iotHubName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('scaleFunctionAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('functionUrl')]"
+                },
+                "parameters":{
+                    "functionAppName":{"value": "[variables('scaleFunctionAppName')]"},
+                    "logSAName":{"value": "[variables('logSAName')]"},
+                    "appInsightsName":{"value": "[variables('appInsightsName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('iotHubName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('sendGridName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('sendgridUrl')]"
+                },
+                "parameters":{
+                    "name":{"value": "[variables('sendGridName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('notificationFunctionAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('functionUrl')]"
+                },
+                "parameters":{
+                    "functionAppName":{"value": "[variables('notificationFunctionAppName')]"},
+                    "logSAName":{"value": "[variables('logSAName')]"},
+                    "appInsightsName":{"value": "[variables('appInsightsName')]"},
+                    "extravars": {"value": "[parameters('password')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('sendGridName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('validateFunctionAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('functionUrl')]"
+                },
+                "parameters":{
+                    "functionAppName":{"value": "[variables('validateFunctionAppName')]"},
+                    "logSAName":{"value": "[variables('logSAName')]"},
+                    "appInsightsName":{"value": "[variables('appInsightsName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('iotHubName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('configFunctionAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('functionUrl')]"
+                },
+                "parameters":{
+                    "functionAppName":{"value": "[variables('configFunctionAppName')]"},
+                    "logSAName":{"value": "[variables('logSAName')]"},
+                    "appInsightsName":{"value": "[variables('appInsightsName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('validateFunctionAppName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('iotHubName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('addFunctionAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('functionUrl')]"
+                },
+                "parameters":{
+                    "functionAppName":{"value": "[variables('addFunctionAppName')]"},
+                    "logSAName":{"value": "[variables('logSAName')]"},
+                    "appInsightsName":{"value": "[variables('appInsightsName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('iotHubName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('tsiName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('tsiUrl')]"
+                },
+                "parameters":{
+                    "name":{"value": "[variables('tsiName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" },
+                    "iotHubName":{"value": "[variables('iotHubName')]"}
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('iotHubName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('tsiFunctionAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('functionUrl')]"
+                },
+                "parameters":{
+                    "functionAppName":{"value": "[variables('tsiFunctionAppName')]"},
+                    "logSAName":{"value": "[variables('logSAName')]"},
+                    "appInsightsName":{"value": "[variables('appInsightsName')]"},
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('tsiName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('webAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('webAppUrl')]"
+                },
+                "parameters":{
+                    "webAppName":{"value": "[variables('webAppName')]"},
+                    "sku":{"value": "[parameters('webAppPlanSKU')]"},
+                    "logSAName":{"value": "[variables('logSAName')]"},
+                    "appInsightsName":{"value": "[variables('appInsightsName')]"},
+                    "redisName":{"value": "[variables('redisName')]"},
+                    "gcdbName":{"value": "[variables('cosmosDBName')]"},
+                    "lcdbName":{"value": "[variables('tableSAName')]"},
+                    "location":{"value": "[parameters('location')]"}
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('logSAName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('tableSaName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('cosmosDBName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('appInsightsName'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('redisName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('trafficManagerName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "[variables('trafficManagerUrl')]"
+                },
+                "parameters":{
+                    "webAppName": {"value": "[variables('webAppName')]"}
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('webAppName'))]"
+            ]
+        }
+    ],
+    "outputs": {
+    }
+}
