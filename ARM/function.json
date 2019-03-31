@@ -132,7 +132,7 @@
         "ObjectID":{
             "type": "string",
             "value": "[reference(variables('resourceID'), variables('apiVersion'), 'Full').identity.principalId]"
-        },
+      },
         "TenantID":{
           "type": "string",
           "value": "[reference(variables('resourceID'), variables('apiVersion'), 'Full').identity.tenantId]"

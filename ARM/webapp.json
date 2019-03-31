@@ -142,6 +142,10 @@
         "ObjectID":{
             "type": "string",
             "value": "[reference(variables('resourceID'), variables('webAppApiVersion'), 'Full').identity.principalId]"
+        },
+        "TenantID":{
+            "type": "string",
+            "value": "[reference(variables('resourceID'), variables('webAppApiVersion'), 'Full').identity.tenantId]"
         }
     }
 }
