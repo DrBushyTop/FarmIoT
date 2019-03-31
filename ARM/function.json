@@ -52,7 +52,8 @@
         "logSAId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', parameters('logSAName'))]",
         "funcPlanName": "[concat(parameters('location'),'plan')]",
         "resourceID": "[concat('Microsoft.Web/sites/', parameters('functionAppName'))]",
-        "apiVersion": "[providers('Microsoft.Web', 'sites').apiVersions[0]]"
+        "apiVersion": "[providers('Microsoft.Web', 'sites').apiVersions[0]]",
+        "aiApiVersion": "[providers('Microsoft.Insights', 'components').apiVersions[0]]"
     },
     "resources": [
         {
@@ -113,7 +114,7 @@
                   },
                   {
                     "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                    "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName'))).InstrumentationKey]"
+                    "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), variables('aiApiVersion')).InstrumentationKey]"
                   },
                   {
                     "name": "FUNCTIONS_WORKER_RUNTIME",
