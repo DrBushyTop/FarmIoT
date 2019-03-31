@@ -206,7 +206,7 @@
                     "uri": "[variables('cosmosUrl')]"
                 },
                 "parameters":{
-                    "name":{"value": "[variables('logSAName')]"},
+                    "name":{"value": "[variables('cosmosDBName')]"},
                     "location":{"value": "[parameters('location')]"},
                     "pairedlocation": {"value": "[parameters('pairedLocation')]"},
                     "tags":{"value": "[variables('tags')]" }

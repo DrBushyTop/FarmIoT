@@ -48,6 +48,7 @@
       "name": "[parameters('name')]",
       "apiVersion": "2018-08-15-preview",
       "location": "[parameters('location')]",
+      "kind": "LongTerm",
       "properties": {
         "dataRetentionTime": "[parameters('dataRetentionTime')]",
         "storageConfiguration": {
