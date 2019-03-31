@@ -54,7 +54,13 @@
         "storageConfiguration": {
           "accountName": "[parameters('storageAccountName')]",
           "managementKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2018-02-01').keys[0].value]"
-        }
+        },
+        "timeSeriesIdProperties": [
+          {
+            "name": "customer",
+            "type": "string"
+          }
+        ]
       },
       "sku": {
         "name": "[parameters('skuName')]",

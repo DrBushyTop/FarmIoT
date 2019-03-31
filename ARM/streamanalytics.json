@@ -56,12 +56,12 @@
                           "sharedAccessPolicyKey": "[listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', parameters('iotHubName'), 'service'), '2016-02-03').primaryKey]",
                           "endpoint": "messages/events",
                           "consumerGroupName": "[variables('splitConsumerGroup')[2]]"
-                      },
-                      "serialization": {
-                        "type": "Json",
-                        "properties": {
-                          "encoding": "UTF8"
-                        }
+                      }
+                    },
+                    "serialization": {
+                      "type": "Json",
+                      "properties": {
+                        "encoding": "UTF8"
                       }
                     }
                   }
