@@ -55,6 +55,10 @@
                     "events": {
                         "retentionTimeInDays": 1,
                         "partitionCount": 2
+                    },
+                    "operationsMonitoringEvents": {
+                        "retentionTimeInDays": 2,
+                        "partitionCount": 4
                     }
                 },
                 "cloudToDevice": {
