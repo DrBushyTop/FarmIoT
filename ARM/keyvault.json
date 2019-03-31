@@ -43,6 +43,10 @@
             "metadata": {
                 "description": "password for sendgrid. Will be saved to keyvault, but in production really should not have a default value."
             }
+        },
+        "tags":{
+            "type": "object",
+            "defaultValue": ""
         }
     },
     "variables": {
@@ -56,6 +60,7 @@
            "apiVersion": "2018-02-14",
            "name": "[parameters('keyVaultName')]",
            "location": "[resourceGroup().location]",
+           "tags": "[parameters('tags')]",
            "properties": {
                 "enabledForDeployment": true,
                 "enabledForTemplateDeployment": true,

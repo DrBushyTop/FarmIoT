@@ -27,7 +27,7 @@
     "variables": {},
     "resources": [
         {
-            "name": "string",
+            "name": "[parameters('name')]",
             "type": "Microsoft.StreamAnalytics/streamingjobs",
             "apiVersion": "2016-03-01",
             "location": "[parameters('location')]",
@@ -59,19 +59,6 @@
                 }
               ],
               "outputs": [
-                {
-                  "name": "configurationchange",
-                  "properties": {
-                    "datasource": {
-                      "type": "Microsoft.AzureFunction",
-                      "properties": {
-                        "functionAppName": "[parameters('notificationFunctionAppNAme')]",
-                        "functionName": "PLACEHOLDER",
-                        "apiKey": null
-                      }
-                    }
-                  }
-                }
               ],
               "functions": []
             }

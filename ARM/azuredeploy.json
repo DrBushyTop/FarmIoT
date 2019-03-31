@@ -460,7 +460,8 @@
                     "gcdbName":{"value": "[variables('cosmosDBName')]"},
                     "lcdbName":{"value": "[variables('tableSAName')]"},
                     "keyVaultName":{"value": "[variables('keyVaultName')]"},
-                    "location":{"value": "[parameters('location')]"}
+                    "location":{"value": "[parameters('location')]"},
+                    "tags":{"value": "[variables('tags')]" }
                 }
             },
             "dependsOn": [
@@ -495,7 +496,8 @@
                     "redisName":{"value": "[variables('redisName')]"},
                     "gcdbName":{"value": "[variables('cosmosDBName')]"},
                     "lcdbName":{"value": "[variables('tableSAName')]"},
-                    "sendgridPassword":{"value": "[parameters('sendgridPassword')]"}
+                    "sendgridPassword":{"value": "[parameters('sendgridPassword')]"},
+                    "tags":{"value": "[variables('tags')]" }
                 }
             },
             "dependsOn": [
@@ -521,7 +523,8 @@
                     "uri": "[variables('trafficManagerUrl')]"
                 },
                 "parameters":{
-                    "webAppName": {"value": "[variables('webAppName')]"}
+                    "webAppName": {"value": "[variables('webAppName')]"},
+                    "tags":{"value": "[variables('tags')]" }
                 }
             },
             "dependsOn": [
