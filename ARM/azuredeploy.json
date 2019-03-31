@@ -309,7 +309,7 @@
                     "name":{"value": "[variables('streamAnalyticsName')]"},
                     "location":{"value": "[parameters('location')]"},
                     "iotHubName":{"value": "[variables('iotHubName')]"},
-                    "notificationFuncName": "[variables('notificationFunctionAppName')]",
+                    "notificationFuncName": {"value":"[variables('notificationFunctionAppName')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
             },

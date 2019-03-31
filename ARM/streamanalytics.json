@@ -17,7 +17,7 @@
                 "description": "comsumergroup name from the iothub"
             }
         },
-        "notificationFunctionAppNAme": {
+        "notificationFunctionAppName": {
             "type": "string"
         },
         "tags": {
@@ -59,6 +59,19 @@
                 }
               ],
               "outputs": [
+                {
+                  "name": "configurationchange",
+                  "properties": {
+                    "datasource": {
+                      "type": "Microsoft.AzureFunction",
+                      "properties": {
+                        "functionAppName": "[parameters('notificationFunctionAppNAme')]",
+                        "functionName": "PLACEHOLDER",
+                        "apiKey": null
+                      }
+                    }
+                  }
+                }
               ],
               "functions": []
             }
