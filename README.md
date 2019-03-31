@@ -26,10 +26,11 @@ Short excercise for a Agriculture IoT solution
 - Azure AD is assumed to exist already
 - The templates only deploy one region of the application. Small tweaks will be needed for multiregion deployments. For example traffic manager & cosmosDB replication need to be adjusted.
 - Telemetry from all functions & app service go to the Application insights instance in the region. It's worth considering either having a single instance in one region, or creating a central place for logs where all the app insights instances stream to (requires custom setup).
-- App service needs to be at least a standard sku to allow for autoscaling. 
-- Customer DB does not have autoscaling, but a primitive version could be implemented with Cosmonaut: https://chapsas.com/cosmosdb-action-level-autoscaling-with-cosmonaut/
+- App service needs to be at least a standard sku to allow for autoscaling. Currently set to scale out at 70% cpu use, scale in at 10% cpu use. Both averaging in the last 10 minutes. 
+- Customer DBs do not have autoscaling, but a primitive version for cosmosDB could be implemented with Cosmonaut: https://chapsas.com/cosmosdb-action-level-autoscaling-with-cosmonaut/
+- Separating the functions into multiple function apps raises the complexity of the solution, but will allow the functions to scale independent of each other.
 - The parameters are mostly for example purposes only.
-- Twilio is not in scope of the deployment.
+- Twilio is not in scope of the deployment, but would handle the SMS sending in the notification function app.
 
 
 ## Code remarks

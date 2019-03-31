@@ -19,7 +19,7 @@ No parameters needed.
 #>
 
 # Set parameters:
-$resourceGroupName = "deploytesting"
+$resourceGroupName = "HuuhkaIoTExcercise"
 $location = "westeurope"
 $templateUri = "https://raw.githubusercontent.com/DrBushyTop/FarmIoT/master/ARM/azuredeploy.json"
 
@@ -46,4 +46,7 @@ New-AzureRmResourceGroupDeployment `
   -Name $deploymentName `
   -ResourceGroupName $resourceGroupName `
   -TemplateUri $templateUri `
+  -resourceNamingPrefix "phiot"
 
+ Write-Output "Deployment complete! At least hopefully, there's no error handling here."
+ Write-Output "Remember to delete the resources once done!"
