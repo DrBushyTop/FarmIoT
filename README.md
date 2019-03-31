@@ -5,7 +5,7 @@ Short excercise for a Agriculture IoT solution
 
 ## Architecture Image 
 
-
+![Architecture Image](architecture.jpeg "Architecture Image")
 
 ## Application Action Flow
 
