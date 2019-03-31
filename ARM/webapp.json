@@ -87,6 +87,72 @@
           }
         },
         {
+            "type": "microsoft.insights/autoscalesettings",
+            "name": "cpuscale",
+            "apiVersion": "2014-04-01",
+            "location": "West Europe",
+            "tags": {},
+            "scale": null,
+            "properties": {
+              "profiles": [
+                {
+                  "name": "Auto created scale condition",
+                  "capacity": {
+                    "minimum": "1",
+                    "maximum": "2",
+                    "default": "1"
+                  },
+                  "rules": [
+                    {
+                        "scaleAction": {
+                            "direction": "Decrease",
+                            "type": "ChangeCount",
+                            "value": "1",
+                            "cooldown": "PT5M"
+                        },
+                        "metricTrigger": {
+                            "metricName": "CpuPercentage",
+                            "metricNamespace": "",
+                            "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                            "operator": "GreaterThan",
+                            "statistic": "Average",
+                            "threshold": 10,
+                            "timeAggregation": "Average",
+                            "timeGrain": "PT1M",
+                            "timeWindow": "PT10M"
+                        }
+                    },
+                    {
+                        "scaleAction": {
+                            "direction": "Increase",
+                            "type": "ChangeCount",
+                            "value": "1",
+                            "cooldown": "PT5M"
+                        },
+                        "metricTrigger": {
+                            "metricName": "CpuPercentage",
+                            "metricNamespace": "",
+                            "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                            "operator": "GreaterThan",
+                            "statistic": "Average",
+                            "threshold": 70,
+                            "timeAggregation": "Average",
+                            "timeGrain": "PT1M",
+                            "timeWindow": "PT10M"
+                        }
+                    }
+                  ]
+                }
+              ],
+              "enabled": true,
+              "name": "cpuscale",
+              "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+            },
+            "dependsOn": [
+              "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+            ]
+          },
+        {
           "apiVersion": "2016-08-01",
           "type": "Microsoft.Web/sites",
           "kind": "app",

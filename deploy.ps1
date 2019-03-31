@@ -19,7 +19,7 @@ No parameters needed.
 #>
 
 # Set parameters:
-$resourceGroupName = "Huuhka_FarmIOT"
+$resourceGroupName = "deploytesting"
 $location = "westeurope"
 $templateUri = "https://raw.githubusercontent.com/DrBushyTop/FarmIoT/master/ARM/azuredeploy.json"
 

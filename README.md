@@ -16,6 +16,10 @@ Short excercise for a Agriculture IoT solution
 
 # Notes
 
+# Deployment
+- Log in to Azure powershell with "Login-AzureRmAccount"
+- Run deploy.ps1 from the repo root. It creates a resource group and deploys all the resources there with default parameters.
+
 ## General
 
 - This template deployment defaults to a small P1 redis cluster, which in itself costs 700€/month. Please destroy the resources when needed.
