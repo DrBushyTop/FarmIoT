@@ -74,7 +74,7 @@
             "iotHubName": "[parameters('iotHubName')]",
             "consumerGroupName": "[variables('splitConsumerGroup')[2]]",
             "keyName": "device",
-            "sharedAccessKey": "[listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', parameters('name'), 'device'), '2016-02-03').primaryKey]",
+            "sharedAccessKey": "[listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', parameters('iotHubName'), 'device'), '2016-02-03').primaryKey]",
             "timestampPropertyName": ""
           },
           "tags": "[parameters('tags')]",
