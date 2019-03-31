@@ -82,7 +82,7 @@
         "storageUrl": "[concat(uri(deployment().properties.templateLink.uri, 'storage.json'))]",
         "appInsightsUrl": "[concat(uri(deployment().properties.templateLink.uri, 'appinsights.json'))]",
         "iotHubUrl": "[concat(uri(deployment().properties.templateLink.uri, 'iothub.json'))]",
-        "cosmosUrl": "[concat(uri(deployment().properties.templateLink.uri, 'cosmos.json'))]",
+        "cosmosUrl": "[concat(uri(deployment().properties.templateLink.uri, 'cosmosdb.json'))]",
         "redisUrl": "[concat(uri(deployment().properties.templateLink.uri, 'redis.json'))]",
         "sendgridUrl": "[concat(uri(deployment().properties.templateLink.uri, 'sendgrid.json'))]",
         "functionUrl": "[concat(uri(deployment().properties.templateLink.uri, 'function.json'))]",
@@ -111,9 +111,7 @@
         "appInsightsName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'appinsights')]",
         "trafficManagerName": "[concat(variables('prefixInLowerCase'), '-', 'tm')]",
         "sendGridName": "[concat(variables('prefixInLowerCase'), '-', parameters('location'), '-', 'sg')]",
-        "tags": [
-            {"environment": "[parameters('environment')]"}
-        ]
+        "tags": {"environment": "[parameters('environment')]"}
     },
     "resources": [
         {
@@ -174,7 +172,7 @@
                     "uri": "[variables('appInsightsUrl')]"
                 },
                 "parameters":{
-                    "name":{"value": "[variables('appInsightsName')]"},
+                    "appInsightsName":{"value": "[variables('appInsightsName')]"},
                     "location":{"value": "[parameters('location')]"},
                     "tags":{"value": "[variables('tags')]" }
                 }
@@ -268,7 +266,8 @@
                 "parameters":{
                     "name":{"value": "[variables('sendGridName')]"},
                     "location":{"value": "[parameters('location')]"},
-                    "tags":{"value": "[variables('tags')]" }
+                    "tags":{"value": "[variables('tags')]" },
+                    "password":{"value": "[parameters('sendgridPassword')]"}
                 }
             }
         },
